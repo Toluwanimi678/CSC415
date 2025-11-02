@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Emotion Detection</title>
+</head>
+<body>
+    <h1>Emotion Detection from Face</h1>
+   <form action="/predict" method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Detect Emotion</button>
+</form>
+    {% if emotion %}
+        <h2>Detected Emotion: {{ emotion }}</h2>
+    {% endif %}
+</body>
+</html>
