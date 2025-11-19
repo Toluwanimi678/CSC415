@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZOF Solver - Numerical Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="container">
+
+    <div class="header">
+        <h1 class="title">Zero of Functions Solver</h1>
+        <p class="subtitle">Numerical Methods Project</p>
+        <div class="underline"></div>
+    </div>
+
+    <div class="solver-card glass">
+        <form id="solverForm">
+            <div class="form-grid">
+
+                <!-- Method Selection -->
+                <div class="form-group full-width">
+                    <label for="method">Select Method</label>
+                    <select name="method" id="method" onchange="updateForm()">
+                        <option value="bisection">Bisection Method</option>
+                        <option value="regula_falsi">Regula Falsi (False Position)</option>
+                        <option value="secant">Secant Method</option>
+                        <option value="newton">Newton-Raphson Method</option>
+                        <option value="fixed_point">Fixed Point Iteration</option>
+                        <option value="mod_secant">Modified Secant Method</option>
+                    </select>
+                </div>
+
+                <!-- Function Input -->
+                <div class="form-group full-width">
+                    <label for="function">Function f(x) or g(x)</label>
+                    <input type="text" name="function" id="function" required placeholder="e.g., x**3 - x - 2">
+                    <div class="formula-hint">Use Python syntax: x**2, sin(x), exp(x). For Fixed Point enter g(x).</div>
+                </div>
+
+                <!-- Derivative (Newton only) -->
+                <div class="form-group input-group" id="grp-deriv">
+                    <label for="derivative">Derivative f'(x)</label>
+                    <input type="text" name="derivative" placeholder="e.g., 3*x**2 - 1">
+                </div>
+
+                <!-- Interval -->
+                <div class="form-group input-group" id="grp-a">
+                    <label for="param_a">Lower Bound (a)</label>
+                    <input type="number" step="any" name="param_a">
+                </div>
+
+                <div class="form-group input-group" id="grp-b">
+                    <label for="param_b">Upper Bound (b)</label>
+                    <input type="number" step="any" name="param_b">
+                </div>
+
+                <!-- Initial guesses -->
+                <div class="form-group input-group" id="grp-x0">
+                    <label for="param_x0">Initial Guess (x0)</label>
+                    <input type="number" step="any" name="param_x0">
+                </div>
+
+                <div class="form-group input-group" id="grp-x1">
+                    <label for="param_x1">Second Guess (x1)</label>
+                    <input type="number" step="any" name="param_x1">
+                </div>
+
+                <!-- Delta -->
+                <div class="form-group input-group" id="grp-delta">
+                    <label for="param_delta">Delta (Perturbation)</label>
+                    <input type="number" step="any" name="param_delta" value="0.01">
+                </div>
+
+                <!-- General Settings -->
+                <div class="form-group">
+                    <label for="tolerance">Tolerance</label>
+                    <input type="number" step="any" name="tolerance" value="0.0001" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="max_iter">Max Iterations</label>
+                    <input type="number" name="max_iter" value="50" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <button type="submit" id="submitBtn">Calculate Root</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div class="results-card glass" id="resultsCard">
+        <h2>Computation Results</h2>
+        <div id="statusMessage"></div>
+
+        <div class="table-wrapper">
+            <table id="resultsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Iter</th>
+                        <th>Root Estimate</th>
+                        <th>Value</th>
+                        <th>Abs Error</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function updateForm() {
+        const method = document.getElementById('method').value;
+        document.querySelectorAll('.input-group').forEach(el => el.classList.remove('active'));
+
+        if (method === 'bisection' || method === 'regula_falsi') {
+            grp_a.classList.add('active');
+            grp_b.classList.add('active');
+        } else if (method === 'secant') {
+            grp_x0.classList.add('active');
+            grp_x1.classList.add('active');
+        } else if (method === 'newton') {
+            grp_deriv.classList.add('active');
+            grp_x0.classList.add('active');
+        } else if (method === 'fixed_point') {
+            grp_x0.classList.add('active');
+        } else if (method === 'mod_secant') {
+            grp_x0.classList.add('active');
+            grp_delta.classList.add('active');
+        }
+    }
+
+    document.getElementById('solverForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('submitBtn');
+        const resultsCard = document.getElementById('resultsCard');
+        const statusMsg = document.getElementById('statusMessage');
+        const table = document.getElementById('resultsTable');
+        const tbody = document.getElementById('resultsBody');
+
+        btn.disabled = true;
+        btn.innerText = "Calculating...";
+        resultsCard.style.display = 'none';
+        tbody.innerHTML = "";
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch("/", { method: "POST", body: formData });
+            const result = await response.json();
+
+            resultsCard.style.display = "block";
+
+            if (result.error) {
+                statusMsg.innerHTML = `<p class="error-msg">${result.error}</p>`;
+                table.style.display = "none";
+            } else {
+                if (result.converged) {
+                    statusMsg.innerHTML = `<p class="success">Converged to Root: ${result.root}</p>`;
+                } else {
+                    statusMsg.innerHTML = `<p class="error-msg">Did not converge within max iterations.</p>`;
+                }
+
+                table.style.display = "table";
+                result.data.forEach(row => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.iter}</td>
+                            <td>${row.root}</td>
+                            <td>${row.func}</td>
+                            <td>${row.error}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+        } catch (error) {
+            resultsCard.style.display = "block";
+            statusMsg.innerHTML = `<p class="error-msg">System Error: ${error.message}</p>`;
+            table.style.display = "none";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Calculate Root";
+        }
+    });
+
+    window.onload = updateForm;
+</script>
+
+</body>
+</html>
