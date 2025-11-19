@@ -1,0 +1,73 @@
+/* ===== GENERAL PAGE STYLING ===== */
+body {
+    background: #f5f6fa;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    padding: 30px;
+}
+
+/* ===== MAIN CARD ===== */
+.card {
+    max-width: 650px;
+    margin: auto;
+    border-radius: 12px;
+    border: 1px solid #dcdde1;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+}
+
+/* ===== HEADINGS ===== */
+h2, h4, h5 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* ===== INPUT FIELDS ===== */
+input, select {
+    border-radius: 8px !important;
+    padding: 10px !important;
+    border: 1px solid #ced6e0 !important;
+}
+
+input:focus, select:focus {
+    border-color: #1e90ff !important;
+    box-shadow: 0 0 5px rgba(30,144,255,0.4) !important;
+}
+
+/* ===== BUTTON ===== */
+button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* ===== TABLE ===== */
+table {
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table th {
+    background: #1e90ff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+table td {
+    text-align: center;
+    padding: 8px;
+}
+
+/* ===== MOBILE FRIENDLY ===== */
+@media screen and (max-width: 600px) {
+    .card {
+        padding: 20px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}

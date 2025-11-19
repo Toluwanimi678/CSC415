@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results - ZOF</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="p-4">
+
+<h2 class="text-center mb-4">Computation Results</h2>
+
+<div class="card p-4 shadow">
+
+    <h4>Final Root: {{ root }}</h4>
+    <h4>Error: {{ error }}</h4>
+    <h4>Iterations: {{ iters }}</h4>
+
+    <hr>
+
+    <h5>Iteration Details</h5>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                {% for col in logs[0] %}
+                    <th>Col {{ loop.index }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in logs %}
+                <tr>
+                    {% for val in row %}
+                        <td>{{ val }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
